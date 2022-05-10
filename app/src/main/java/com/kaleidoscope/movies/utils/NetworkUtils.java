@@ -3,12 +3,14 @@ package com.kaleidoscope.movies.utils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -22,9 +24,9 @@ public class NetworkUtils {
     public static final String OPTION_TOP250 = "top?type=TOP_250_BEST_FILMS&page=1";
 
 
+
     public static JSONObject getJSONFromNetwork(String options) {
         JSONObject result = null;
-
         try {
             URL url = new URL(BASE_URL + options);
             result = new JSONLoadTask().execute(url).get();
@@ -53,25 +55,17 @@ public class NetworkUtils {
                 connection.setRequestProperty("Accept", "application/json");
                 connection.setRequestProperty("X-API-KEY", API_KEY);
                 connection.setDoOutput(true);
-     
 
-                request = new OutputStreamWriter(connection.getOutputStream());
-
-
-                InputStreamReader inputStreamReader = null;
-
-                int status = connection.getResponseCode();
-                if(status < 400) {
-                    inputStreamReader = new InputStreamReader(connection.getInputStream());
-
-                } else{
-                    inputStreamReader = new InputStreamReader(connection.getErrorStream());
+                if (connection.getResponseCode() != 200) {
+                    Log.i("OUT_connection", "" + connection.getResponseCode());
+                    Log.i("jamian", "url connection response not 200 | " + connection.getResponseCode());
+                    throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode());
                 }
 
 
 
-               // InputStream inputStream = connection.getInputStream();
-               // InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                InputStream inputStream = connection.getInputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                 builder = new StringBuilder();
                 String line = bufferedReader.readLine();
