@@ -3,49 +3,31 @@ package com.kaleidoscope.movies;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.json.JSONArray;
+
 public class Post {
-    @SerializedName("userId")
+    @SerializedName("pagesCount")
     @Expose
-    private int userId;
-    @SerializedName("id")
+    private int pagesCount;
+
+    @SerializedName("films")
     @Expose
-    private int id;
-    @SerializedName("title")
-    @Expose
-    private String title;
-    @SerializedName("body")
-    @Expose
-    private String body;
+    private JSONArray films;
 
-    public int getUserId() {
-        return userId;
+    public int getPagesCount() {
+        return pagesCount;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public JSONArray getFilms() {
+        return films;
     }
 
-    public int getId() {
-        return id;
+    public void setPagesCount(int pagesCount) {
+        this.pagesCount = pagesCount;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setFilms(JSONArray films) {
+        this.films = films;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
-    }
 }

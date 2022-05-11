@@ -5,9 +5,13 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.gson.JsonParser;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -17,9 +21,15 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+
 public class NetworkUtils {
     private static final String API_KEY = "e7522639-089f-4044-a22a-ef5a2d5000da";
-    private static final String BASE_URL = "https://kinopoiskapiunofficial.tech/api/v2.2/films/";
+    private static final String BASE_URL = "https://kinopoiskapiunofficial.tech/api/v2.2/films/top?type=TOP_250_BEST_FILMS&page=1";
 
     public static final String OPTION_TOP250 = "top?type=TOP_250_BEST_FILMS&page=1";
 
@@ -28,7 +38,7 @@ public class NetworkUtils {
     public static JSONObject getJSONFromNetwork(String options) {
         JSONObject result = null;
         try {
-            URL url = new URL(BASE_URL + options);
+            URL url = new URL(BASE_URL);
             result = new JSONLoadTask().execute(url).get();
         } catch (Exception e) {
             e.printStackTrace();
@@ -39,8 +49,8 @@ public class NetworkUtils {
     private static class JSONLoadTask extends AsyncTask<URL, Void, JSONObject> {
         JSONObject result = null;
         StringBuilder builder = null;
-        HttpsURLConnection connection = null;
-        OutputStreamWriter request = null;
+        OkHttpClient httpClient = null;
+        Response response = null;
 
         @Override
         protected JSONObject doInBackground(URL... urls) {
@@ -48,44 +58,56 @@ public class NetworkUtils {
                 return result;
             }
 
+            httpClient = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(urls[0])
+                    .addHeader("accept", "application/json")
+                    .addHeader("X-API-KEY", API_KEY)
+                    .build();
+
+            Call call = httpClient.newCall(request);
             try {
-                connection = (HttpsURLConnection) urls[0].openConnection();
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type", "application/json; utf-8");
-                connection.setRequestProperty("Accept", "application/json");
-                connection.setRequestProperty("X-API-KEY", API_KEY);
-                connection.setDoOutput(true);
-
-                if (connection.getResponseCode() != 200) {
-                    Log.i("OUT_connection", "" + connection.getResponseCode());
-                    Log.i("jamian", "url connection response not 200 | " + connection.getResponseCode());
-                    throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode());
-                }
-
-
-
-                InputStream inputStream = connection.getInputStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                builder = new StringBuilder();
-                String line = bufferedReader.readLine();
-                while (line != null) {
-                    builder.append(line);
-                    line = bufferedReader.readLine();
-                }
-                result = new JSONObject(builder.toString());
-
-            }catch (Exception e) {
-                Log.i("EXC", "JSONLoadTask");
+                response = call.execute();
+            } catch (IOException e) {
                 e.printStackTrace();
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
+            }
+
+            if (response.code() > 200) {
+                Log.i("OUTPUT", "" + response.code());
+                return null;
+            } else {
+                try {
+                    Log.i("RESULT", response.toString());
+
+
+
+
+
+
+
+
+                   // result = new JSONObject(response.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
             return result;
         }
     }
-
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

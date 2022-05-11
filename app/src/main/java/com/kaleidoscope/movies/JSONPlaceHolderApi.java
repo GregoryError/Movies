@@ -12,6 +12,8 @@ public interface JSONPlaceHolderApi {
     })
 
 
-    @GET("/posts/{id}")
+    @GET("top?type=TOP_250_BEST_FILMS&page=1")
     public Call<Post> getPostWithID(@Path("id") int id);
+
+     // top?type=TOP_250_BEST_FILMS&page=1";
 }
