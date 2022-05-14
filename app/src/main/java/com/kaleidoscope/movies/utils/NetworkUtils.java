@@ -5,7 +5,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonParser;
+import com.kaleidoscope.movies.JSONEntity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,6 +27,7 @@ import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 
 public class NetworkUtils {
@@ -48,9 +51,14 @@ public class NetworkUtils {
 
     private static class JSONLoadTask extends AsyncTask<URL, Void, JSONObject> {
         JSONObject result = null;
-        StringBuilder builder = null;
+
         OkHttpClient httpClient = null;
         Response response = null;
+
+        Gson gson = new Gson();
+        ResponseBody responseBody = null;
+        JSONEntity jsonEntity = null;
+
 
         @Override
         protected JSONObject doInBackground(URL... urls) {
@@ -64,33 +72,27 @@ public class NetworkUtils {
                     .addHeader("accept", "application/json")
                     .addHeader("X-API-KEY", API_KEY)
                     .build();
-
-            Call call = httpClient.newCall(request);
             try {
-                response = call.execute();
+                response = httpClient.newCall(request).execute();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            if (response.code() > 200) {
-                Log.i("OUTPUT", "" + response.code());
-                return null;
-            } else {
-                try {
-                    Log.i("RESULT", response.toString());
-
-
-
-
-
-
-
-
-                   // result = new JSONObject(response.toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            try {
+             //   Log.i("RESULT", response.body().string());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+            try {
+                result = new JSONObject(response.body().string());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             return result;
         }
     }
